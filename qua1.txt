@@ -1,0 +1,37 @@
+import com.google.cloud.translate.Translate;
+import com.google.cloud.translate.TranslateOptions;
+import com.google.cloud.translate.Translation;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+public class MarathiToEnglishTranslator {
+
+    public static void main(String[] args) throws IOException {
+        // Sample Marathi text from rows 4, 7, and 8
+        Map<Integer, String> marathiText = new HashMap<>();
+        marathiText.put(4, "भू-मापन, पोटहिस्साव घरक्रमांक(असल्या स)");
+        marathiText.put(7, "दस्तऐवज करुन देणा -या /लिहून ठेवणा -या पक्षकाराचे नाव किंवा दिवाणी न्यायालयाचा हुकुमनामा किंवा आदेश असल्यास, प्रतिवादीचे नाव व पत्ता");
+        marathiText.put(8, "दस्तऐवज करुन घेणा -या पक्षकाराचे व किंवा दिवाणी न्यायालयाचा हुकुमनामा किंवा आदेश असल्यास, प्रतिवादीचे नाव व पत्ता");
+
+        // Translate Marathi text to English
+        Translate translate = TranslateOptions.getDefaultInstance().getService();
+        Map<Integer, String> englishText = new HashMap<>();
+        for (Map.Entry<Integer, String> entry : marathiText.entrySet()) {
+            Translation translation = translate.translate(entry.getValue(), Translate.TranslateOption.sourceLanguage("mr"), Translate.TranslateOption.targetLanguage("en"));
+            englishText.put(entry.getKey(), translation.getTranslatedText());
+        }
+
+        // Save translated text to a CSV file
+        try (CSVPrinter printer = new CSVPrinter(new FileWriter("translated_text.csv"), CSVFormat.DEFAULT)) {
+            printer.printRecord("Row Number", "Translated Text");
+            for (Map.Entry<Integer, String> entry : englishText.entrySet()) {
+                printer.printRecord(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+}
